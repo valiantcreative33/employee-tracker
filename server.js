@@ -3,14 +3,12 @@ const mysql = require('mysql2');
 
 // Connection to mySQL server for Inquirer to call upon
 const connection = mysql.createConnection({
-    host: '27.0.0.1',
+    host: 'localhost',
     user: 'root',
     password: 'password',
-    // port: 3308,
+    // port: 3306,
     database: 'company_db'
 });
-
-// connection.connect();
 
 function promptUser() {
     inquirer
@@ -18,7 +16,7 @@ function promptUser() {
         type: 'list',
         name: 'actionsMenu',
         message: 'What would you like to do?',
-        choices: ['View all employees', 'View all departments', 'View all roles', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee', 'Exit']
+        choices: ['View all employees', 'View all departments', 'View all roles', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee', 'View by department', 'View cost by department', 'Exit']
         })
         .then(choices => {
             switch (choices['actionsMenu']) {
@@ -33,16 +31,22 @@ function promptUser() {
                     break;
                 case 'Add a department':
                     addDepartment();
-                     break;
+                    break;
                 case 'Add a role':
                     addRole();
-                     break;
+                    break;
                 case 'Add an employee':
                     addEmployee();
-                     break;
+                    break;
                 case 'Update an employee':
                     updateEmployee();
-                     break;
+                    break;
+                case 'View by department':
+                    empByDepartment();
+                    break;
+                case 'View cost by department':
+                    costPerDepartment();
+                    break;
                 case 'Exit':
                     exit();
             }
@@ -139,7 +143,9 @@ function addDepartment() {
                     {
                         department_name: `${dataInput.newDepartment}`
                     },
-                function() {
+                    function(err, res) {
+                        if (err) throw err;
+                        console.log(res);
                     allDepartments();
                 }
             );
@@ -197,6 +203,7 @@ function addEmployee() {
             )
         })
 };
+
 function updateEmployee() {
     inquirer
         .prompt([
@@ -232,6 +239,37 @@ function updateEmployee() {
                 }
             )
         })
+};
+
+function empByDepartment() {
+    connection.query(
+        `SELECT CONCAT(employee.first_name, ' ', employee.last_name) AS name, department.department_name AS department
+        FROM employee
+        INNER JOIN role 
+        ON role.id = employee.role_id
+        INNER JOIN department
+        ON role.department_id = department.id`,
+        function(err, res) {
+            if (err) throw err;
+            console.table(res);
+            promptUser();
+        }
+    );    
+}
+
+function costPerDepartment() {
+    connection.query(
+        `SELECT department.department_name AS Department, SUM(role.salary) AS Cost
+        FROM department
+        INNER JOIN role 
+        ON role.department_id = department.id
+        GROUP BY department.department_name;`,
+        function(err, res) {
+            if (err) throw err;
+            console.table(res);
+            promptUser();
+        }
+    )
 }
 
 const exit = () => {
