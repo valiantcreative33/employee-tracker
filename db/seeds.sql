@@ -3,6 +3,7 @@ VALUES
     ('Engineering'),
     ('Marketing'),
     ('Sales'),
+    ('Copy'),
     ('Customer Service');
 
 INSERT INTO role (title, salary, department_id)
@@ -11,20 +12,19 @@ VALUES
     ('Engineer', 100000, 1),
     ('Marketing Director', 200000, 2),
     ('Graphic Designer', 55000, 2),
-    ('Digital Marketer', 75000, 2),
-    ('Head of Sales', 120000, 3),
+    ('Digital Manager', 75000, 2),
+    ('Sales Director', 120000, 3),
     ('Salesperson', 70000, 3),
-    ('Salesperson', 70000, 3),
-    ('CS Lead', 150000, 4);
+    ('Copywriter Director', 150000, 4);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES 
-    ('Ronald', 'Firbank', 1, 1),
-    ('Virginia', 'Woolf', 2, NULL),
-    ('Piers', 'Gaveston', 3, 2),
-    ('Charles', 'LeRoi', 4, NULL),
-    ('Katherine', 'Mansfield', 5, NULL),
-    ('Dora', 'Carrington', 6, 3),
-    ('Edward', 'Bellamy', 7, NULL),
-    ('Montague', 'Summers', 8, NULL),
-    ('Octavia', 'Butler', 9, 4);
+    ('George', 'St.Pierre', 1, NULL),
+    ('Nurmagomedov', 'Khabib', 2, 1),
+    ('Holloway', 'Max', 3, NULL),
+    ('Charles', 'Oliveira', 4, 3),
+    ('Silva', 'Anderson', 5, 3),
+    ('Clark', 'Kent', 6, NULL),
+    ('Jim', 'Carrey', 7, 6),
+    ('Wayne', 'Bruce', 7, 6),
+    ('Rogan', 'Joe', 8, NULL);
