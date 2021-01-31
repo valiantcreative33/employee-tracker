@@ -1,12 +1,11 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
-
 // Connection to mySQL server for Inquirer to call upon
 const connection = mysql.createConnection({
     host: 'localhost',
+    // port: 3306,
     user: 'root',
     password: 'password',
-    // port: 3306,
     database: 'company_db'
 });
 
@@ -16,7 +15,7 @@ function promptUser() {
         type: 'list',
         name: 'actionsMenu',
         message: 'What would you like to do?',
-        choices: ['View all employees', 'View all departments', 'View all roles', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee', 'View by department', 'View cost by department', 'Exit']
+        choices: ['View all employees', 'View all departments', 'View all roles', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee', 'View by department', 'View cost by department', 'Delete department, role, or employee', 'Exit']
         })
         .then(choices => {
             switch (choices['actionsMenu']) {
@@ -27,7 +26,7 @@ function promptUser() {
                     allDepartments();
                     break;
                 case 'View all roles':
-                    allRoles();
+                        allRoles();
                     break;
                 case 'Add a department':
                     addDepartment();
@@ -47,43 +46,15 @@ function promptUser() {
                 case 'View cost by department':
                     costPerDepartment();
                     break;
+                case 'Delete department, role, or employee':
+                    deleteBy();
+                    break;
                 case 'Exit':
                     exit();
             }
         })
-} 
+}
 
-const allEmployees = () => {
-    connection.query(
-        `SELECT * FROM employee`,
-        function(err, result) {
-            console.log('\n')
-            console.table(result);
-            promptUser();
-        }
-    );
-};
-
-const allDepartments = () => {
-    connection.query(
-        `SELECT * FROM department`,
-        function(err, result) {
-            console.log('\n')
-            console.table(result);
-            promptUser();
-        }
-    );
-};
-const allRoles = () => {
-    connection.query(
-        `SELECT * FROM role`,
-        function(err, result) {
-            console.log('\n')
-            console.table(result);
-            promptUser();
-        }
-    );
-};
 function addRole() {
     inquirer 
         .prompt([
@@ -113,9 +84,7 @@ function addRole() {
             }
         ])  
         .then(dataInput => {
-            console.log('======HIIIII=====', dataInput);
             connection.query(
-                // ? is a query that corresponds to the values within the objects
                 'INSERT INTO role SET title = ?, salary = ?, department_id = ?',
                 [dataInput.newRole, dataInput.salary, dataInput.departmentId],
                 function(err, res) {
@@ -143,9 +112,9 @@ function addDepartment() {
                     {
                         department_name: `${dataInput.newDepartment}`
                     },
-                    function(err, res) {
-                        if (err) throw err;
-                        console.log(res);
+                function(err, res) {
+                    if (err) throw err;
+                    console.log(res);
                     allDepartments();
                 }
             );
@@ -241,41 +210,42 @@ function updateEmployee() {
         })
 };
 
-function empByDepartment() {
-    connection.query(
-        `SELECT CONCAT(employee.first_name, ' ', employee.last_name) AS name, department.department_name AS department
-        FROM employee
-        INNER JOIN role 
-        ON role.id = employee.role_id
-        INNER JOIN department
-        ON role.department_id = department.id`,
-        function(err, res) {
-            if (err) throw err;
-            console.table(res);
-            promptUser();
-        }
-    );    
-}
-
-function costPerDepartment() {
-    connection.query(
-        `SELECT department.department_name AS Department, SUM(role.salary) AS Cost
-        FROM department
-        INNER JOIN role 
-        ON role.department_id = department.id
-        GROUP BY department.department_name;`,
-        function(err, res) {
-            if (err) throw err;
-            console.table(res);
-            promptUser();
-        }
-    )
+function deleteBy() {
+    inquirer
+        .prompt([
+                {
+                    type: 'list',
+                    name: 'selectTable',
+                    message: 'What would you like to delete?',
+                    choices: ['employee', 'role', 'department']
+                },
+                {
+                    type: 'text',
+                    name: 'delete',
+                    message: 'What is the data id that you want to delete?'
+                }
+            ])
+            .then(dataInput => {
+                console.log(dataInput);
+                connection.query(
+                    `DELETE FROM ${dataInput.selectTable}
+                    WHERE id = ?`,
+                    [dataInput.delete],
+                    function(err, res) {
+                        if (err) throw err;
+                        console.log(res);
+                        promptUser();
+                    }
+                )
+            })
+            
 }
 
 const exit = () => {
     connection.end();
-};
+}
 
 promptUser();
 
 module.exports = { promptUser, connection };
+const { allEmployees, allDepartments, allRoles, empByDepartment, costPerDepartment } = require('./lib/functions');
