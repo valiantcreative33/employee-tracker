@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
+
 // Connection to mySQL server for Inquirer to call upon
 const connection = mysql.createConnection({
     host: 'localhost',
